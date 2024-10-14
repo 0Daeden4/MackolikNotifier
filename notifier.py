@@ -1,5 +1,5 @@
 import requests
-import json
+import os
 from datetime import datetime
 
 # TODO: Import update interval and selected teams
@@ -86,27 +86,44 @@ class MackolikRunner(object):
                         #print(match)
                         parameters = "ajaxViewName=events&matchId="+match
                         match_events = self.getResponse(self.match_event_url, parameters , self.match_event_header)
+                        match_title = home_team + " - " + away_team
                         #print(match_events)
                         if match_events and len(match_events.get("data").get("keyEvents"))>event_num:
                             #TODO set different behaviour for different event types
-                            print(str(match_events.get("data").get("keyEvents")[event_num])+"\n")
+                            events = match_events.get("data").get("keyEvents")[event_num]
+                            #print(str(match_events.get("data").get("keyEvents")[event_num])+"\n")
+                            event_type = events.get("type")
+                            player = events.get("playerName")
+                            min = events.get("timeMin")
+                            # Too lazy to write cases for each event type
+                            player_out = ""
+                            sub_event = ""
+                            if event_type == "substitue":
+                                player_out = events.get("playerOutName")
+                            else:
+                                sub_event = events.get("subType")
+                            os.system(f"./notifications.sh -t '{event_type}' -c '{sub_event}' -p '{player}' -po '{player_out}' -ti '{min}' -tt '{match_title}'")
+
                             return True
         return False
+
+    def mainLoop(self, teams_list):
+        while(1):
+            all_matches = self.getAllMatches()
+            for i in range(len(teams_list)):
+                #TODO check whether the event was displayed or not before calling the method
+                team_name, event_num = teams_list[i]
+                event_ready = self.getEvent(all_matches, team_name, event_num)
+                if event_ready:
+                    event_num += 1
+                    teams_list[i] = (team_name, event_num)
                         
 
 
 def main():
-    teams_list = [("Portekiz U20", 0), ("Osmaniyespor FK",0)]
+    teams_list = [("Portekiz U20", 0), ("Osmaniyespor FK",0), ("Türkiye", 0), ("Once Caldas",0)]
     fetcher = MackolikRunner()
-    while(1):
-        all_matches = fetcher.getAllMatches()
-        for i in range(len(teams_list)):
-            #TODO check whether the event was displayed or not before calling the method
-            team_name, event_num = teams_list[i]
-            event_ready = fetcher.getEvent(all_matches, team_name, event_num)
-            if event_ready:
-                event_num += 1
-                teams_list[i] = (team_name, event_num)
+    fetcher.mainLoop(teams_list)
 
 
 
