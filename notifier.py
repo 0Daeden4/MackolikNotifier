@@ -8,7 +8,7 @@ from datetime import datetime
 
 # Match <Selected Teams> with the current information and extract their ids
 
-# TODO: Define a dict that contains the matches as keys and the most recent event number as value 
+# TODO: Define a dict that contains the matches as keys and the most recent event number as value
 # TODO: Add a match if the match has started
 # TODO: Remove match if it is has ended
     # TODO: Update List every <Update Interval> seconds after a match starts
@@ -98,11 +98,14 @@ class MackolikRunner(object):
                             # Too lazy to write cases for each event type
                             player_out = ""
                             sub_event = ""
-                            if event_type == "substitue":
+                            score = ""
+                            if event_type == "substitute":
                                 player_out = events.get("playerOutName")
+                            elif event_type == "goal":
+                                score = events.get("score")
                             else:
                                 sub_event = events.get("subType")
-                            os.system(f"./notifications.sh -t '{event_type}' -c '{sub_event}' -p '{player}' -po '{player_out}' -ti '{min}' -tt '{match_title}'")
+                            os.system(f"./notifications.sh -t '{event_type}' -c '{sub_event}' -p '{player}' -po '{player_out}' -s '{score}' -ti '{min}' -tt '{match_title}'")
 
                             return True
         return False
@@ -117,11 +120,12 @@ class MackolikRunner(object):
                 if event_ready:
                     event_num += 1
                     teams_list[i] = (team_name, event_num)
-                        
+
 
 
 def main():
-    teams_list = [("Portekiz U20", 0), ("Osmaniyespor FK",0), ("Türkiye", 0), ("Once Caldas",0)]
+    teams_list = []
+
     fetcher = MackolikRunner()
     fetcher.mainLoop(teams_list)
 

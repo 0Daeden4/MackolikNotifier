@@ -16,6 +16,7 @@ ICON=""
 MESSAGE=""
 PLAYER=""
 PLAYER_OUT=""
+SCORE=""
 TYPE=""
 TITLE=""
 TIME=""
@@ -42,6 +43,10 @@ for arg in "$@"; do
       ;;
     -po|--player-out)
       PLAYER_OUT="$2"
+      shift 2
+      ;;
+    -s|--score)
+      SCORE="$2"
       shift 2
       ;;
     -t|--type)
@@ -74,8 +79,13 @@ if [ "$TYPE" = "card" ]; then
 elif [ "$TYPE" = "goal" ]; then
     BACKGROUND_COLOR="#2cb307"
     OUTLINE_COLOR="#ffffff"
-    TITLE+="$(echo -e "\nGOAL")"
-    MESSAGE="$(echo -e "$PLAYER scored a goal!\nMinute: $TIME")"
+    if [ "$PLAYER" = "None" ]; then
+      TITLE+="$(echo -e "\n$SCORE")"
+      MESSAGE="$(echo -e "GOAL!\nMinute: $TIME")"
+    else
+      TITLE+="$(echo -e "\n$SCORE")"
+      MESSAGE="$(echo -e "$PLAYER scored a goal!\nMinute: $TIME")"
+    fi
 
 elif [ "$TYPE" = "penalty-missed" ]; then
     BACKGROUND_COLOR="#cc4d12"
